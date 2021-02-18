@@ -15,7 +15,6 @@ public class Bot {
     private GameState gameState;
     private Opponent opponent;
     private MyWorm currentWorm;
-    private PowerUp powerUp;
 
     public Bot(Random random, GameState gameState) {
         this.random = random;
@@ -39,11 +38,11 @@ public class Bot {
         }
 
         Cell powerUp = getNearestPowerUp();
-            if (powerUp != null) {
-            Position powerUpPosition = null;
+        if (powerUp != null) {
+            Position powerUpPosition = new Position();
             powerUpPosition.x = powerUp.x;
             powerUpPosition.y = powerUp.y;
-            return new moveAndDigTo(powerUpPosition);
+            return moveAndDigTo(powerUpPosition);
         }
 
         List<Cell> surroundingBlocks = getSurroundingCells(currentWorm.position.x, currentWorm.position.y);
@@ -200,13 +199,11 @@ public class Bot {
     }
 
     private Cell getNearestPowerUp() {
-        int coordinateX = 0;
-        int coordinateY = 0;
-        for (int x=0; x<=33; x++) {
-            for (int y=0; y<=33; y++) {
+        for (int x=0; x<33; x++) {
+            for (int y=0; y<33; y++) {
                 Cell cell = gameState.map[x][y];
-                if (cell.powerUp.equals("HEALTH_PACK")) {
-                    return gameState.map[x][y];
+                if (cell.powerup != null) {
+                    return cell;
                 }
             }
         }
