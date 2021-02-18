@@ -4,8 +4,8 @@ import za.co.entelect.challenge.command.*;
 import za.co.entelect.challenge.entities.*;
 import za.co.entelect.challenge.enums.CellType;
 import za.co.entelect.challenge.enums.Direction;
+import za.co.entelect.challenge.enums.PowerUpType;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,6 +15,7 @@ public class Bot {
     private GameState gameState;
     private Opponent opponent;
     private MyWorm currentWorm;
+    private PowerUp powerUp;
 
     public Bot(Random random, GameState gameState) {
         this.random = random;
@@ -31,27 +32,29 @@ public class Bot {
     }
 
     public Command run() {
-        Worm enemyWormy = opponent.worms[0];
-        if (enemyWormy != null) {
-            return moveAndDigTo(enemyWormy.position);
-
+        Worm enemyWorm = getFirstWormInRange();
+        if (enemyWorm != null) {
+            Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
+            return new ShootCommand(direction);
         }
 
-//        Worm enemyWorm = getFirstWormInRange();
-//        if (enemyWorm != null) {
-//            Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
-//            return new BananaCommand(enemyWorm.position);
-//        }
+        Cell powerUp = getNearestPowerUp();
+            if (powerUp != null) {
+            Position powerUpPosition = null;
+            powerUpPosition.x = powerUp.x;
+            powerUpPosition.y = powerUp.y;
+            return new moveAndDigTo(powerUpPosition);
+        }
 
-//        List<Cell> surroundingBlocks = getSurroundingCells(currentWorm.position.x, currentWorm.position.y);
-//        int cellIdx = random.nextInt(surroundingBlocks.size());
-//
-//        Cell block = surroundingBlocks.get(cellIdx);
-//        if (block.type == CellType.AIR) {
-//            return new MoveCommand(block.x, block.y);
-//        } else if (block.type == CellType.DIRT) {
-//            return new DigCommand(block.x, block.y);
-//        }
+        List<Cell> surroundingBlocks = getSurroundingCells(currentWorm.position.x, currentWorm.position.y);
+        int cellIdx = random.nextInt(surroundingBlocks.size());
+
+        Cell block = surroundingBlocks.get(cellIdx);
+        if (block.type == CellType.AIR) {
+            return new MoveCommand(block.x, block.y);
+        } else if (block.type == CellType.DIRT) {
+            return new DigCommand(block.x, block.y);
+        }
 
         return new DoNothingCommand();
     }
@@ -194,5 +197,20 @@ public class Bot {
             return new DigCommand(nextCell.x, nextCell.y);
         }
         return new DoNothingCommand();
+    }
+
+    private Cell getNearestPowerUp() {
+        int coordinateX = 0;
+        int coordinateY = 0;
+        for (int x=0; x<=33; x++) {
+            for (int y=0; y<=33; y++) {
+                Cell cell = gameState.map[x][y];
+                if (cell.powerUp.equals("HEALTH_PACK")) {
+                    return gameState.map[x][y];
+                }
+            }
+        }
+        /* for (Cell cell : gameState.map[coordinateY][coordinateX]) {} */
+        return null;
     }
 }
