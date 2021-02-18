@@ -33,13 +33,8 @@ public class Bot {
     public Command run() {
         Worm enemyWormy = opponent.worms[0];
         if (enemyWormy != null) {
-            Cell cell = moveAndDigTo(enemyWormy.position);
-            if (cell.type == CellType.AIR) {
-                return (new MoveCommand(cell.x, cell.y));
-            }
-            else if (cell.type == CellType.DIRT) {
-                return (new DigCommand(cell.x, cell.y));
-            }
+            return moveAndDigTo(enemyWormy.position);
+
         }
 
 //        Worm enemyWorm = getFirstWormInRange();
@@ -184,7 +179,7 @@ public class Bot {
         return occupied;
     }
 
-    private Cell moveAndDigTo(Position finish) {
+    private Command moveAndDigTo(Position finish) {
         Cell nextCell = findCellShortestPath(currentWorm.position, finish);
 
         while (checkCell(nextCell)) {
@@ -192,6 +187,12 @@ public class Bot {
             int cellIdx = random.nextInt(surroundingCells.size());
             nextCell = surroundingCells.get(cellIdx);
         }
-        return nextCell;
+        if (nextCell.type == CellType.AIR) {
+            return new MoveCommand(nextCell.x, nextCell.y);
+        }
+        else if (nextCell.type == CellType.DIRT) {
+            return new DigCommand(nextCell.x, nextCell.y);
+        }
+        return new DoNothingCommand();
     }
 }
