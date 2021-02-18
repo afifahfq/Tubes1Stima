@@ -15,6 +15,7 @@ public class Bot {
     private GameState gameState;
     private Opponent opponent;
     private MyWorm currentWorm;
+    private MyPlayer myPlayer;
 
     public Bot(Random random, GameState gameState) {
         this.random = random;
@@ -95,6 +96,10 @@ public class Bot {
 
                 Cell cell = gameState.map[coordinateY][coordinateX];
                 if (cell.type != CellType.AIR) {
+                    break;
+                }
+
+                if (cell.occupier.playerId == myPlayer.id) {
                     break;
                 }
 
