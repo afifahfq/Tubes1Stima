@@ -15,7 +15,6 @@ public class Bot {
     private GameState gameState;
     private Opponent opponent;
     private MyWorm currentWorm;
-    private MyPlayer myPlayer;
 
     public Bot(Random random, GameState gameState) {
         this.random = random;
@@ -99,8 +98,10 @@ public class Bot {
                     break;
                 }
 
-                if (cell.occupier.playerId == myPlayer.id) {
-                    break;
+                if (cell.occupier != null) {
+                    if (cell.occupier.playerId == gameState.myPlayer.id) {
+                        break;
+                    }
                 }
 
                 directionLine.add(cell);
