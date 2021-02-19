@@ -3,8 +3,8 @@ package za.co.entelect.challenge.entities;
 import com.google.gson.annotations.SerializedName;
 
 public class SnowBall {
-    @SerializedName("damage")
-    public int damage;
+    @SerializedName("freezeDuration")
+    public int freezeDuration;
 
     @SerializedName("range")
     public int range;
