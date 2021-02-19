@@ -211,9 +211,8 @@ public class Bot {
 
     private Worm getApproachableOpponent() {
         List<Worm> opponentss = Arrays.asList(gameState.opponents.worms);
-        List<Worm> thisOpponent = opponentss
-                .stream()
-                .filter(w -> w.health > 0);
+        List<Worm> thisOpponent = opponentss.stream()
+                .filter(w-> w.health > 0).collect(Collectors.toList());
 
         int[] distance = {0,0,0,0,0,0,0,0};
         for (int i = 0; i < thisOpponent.stream().count(); i++) {
