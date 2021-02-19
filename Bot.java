@@ -31,6 +31,18 @@ public class Bot {
     }
 
     public Command run() {
+        Position target;
+
+        target = canBananaBomb();
+        if (target.x != -1 && target.y != -1) {
+            return new BananaCommand(target);
+        }
+
+        target = canSnowBall();
+        if (target.x != -1 && target.y != -1) {
+            return new SnowballCommand(target);
+        }
+
         Worm enemyWorm = getFirstWormInRange();
         if (enemyWorm != null) {
             Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
@@ -43,18 +55,6 @@ public class Bot {
             powerUpPosition.x = powerUp.x;
             powerUpPosition.y = powerUp.y;
             return moveAndDigTo(powerUpPosition);
-        }
-
-        Position target;
-
-        target = canBananaBomb();
-        if (target.x != -1 && target.y != -1) {
-            return new BananaCommand(target);
-        }
-
-        target = canSnowBall();
-        if (target.x != -1 && target.y != -1) {
-            return new SnowballCommand(target);
         }
 
         Worm huntedWorm = getApproachableOpponent();
@@ -341,7 +341,7 @@ public class Bot {
         int distance;
 
         if (currentWorm.id==3 ) {
-            if (currentWorm.snowballs.count > 0){
+            if (currentWorm.snowballs.count > 0) {
                 for (Worm enemyWorm : opponent.worms) {
                     if (enemyWorm.health>0) {
                         distance = euclideanDistance(currentWorm.position.x, currentWorm.position.y, enemyWorm.position.x, enemyWorm.position.y);
