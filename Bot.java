@@ -209,15 +209,15 @@ public class Bot {
         return null;
     }
 
-    private Opponent getApproachableOpponent() {
-        List<Opponent> opponents = Arrays.asList(gameState.opponents);
-        List<Opponent> thisOpponent = opponents
+    private Worm getApproachableOpponent() {
+        List<Worm> opponentss = Arrays.asList(gameState.opponents.worms);
+        List<Worm> thisOpponent = opponentss
                 .stream()
                 .filter(w -> w.health > 0);
 
         int[] distance = {0,0,0,0,0,0,0,0};
         for (int i = 0; i < thisOpponent.stream().count(); i++) {
-            distance[i] = euclideanDistance(currentWorm.position.x, currentWorm.position.y, thisOpponent.positon.x, thisOpponent.position.y);
+            distance[i] = euclideanDistance(currentWorm.position.x, currentWorm.position.y, thisOpponent.position.x, thisOpponent.position.y);
         }
 
         int distMin = 0;
@@ -232,33 +232,32 @@ public class Bot {
                 }
             }
         }
+
         return thisOpponent.get(idMin);
         }
 
     private Command followStrategy(int targetWormId) {
-        List<MyPlayer> leader = Arrays.asList();
-        List<Worm> leaderWorms = leader
-                .stream()
-                .filter(w -> w.health > 0)
-                .findFirst(w -> w.id == targetWormId);
-
-        if (euclideanDistance(currentWorm.position.x, currentWorm.position.y, leaderWorms.position.x, leaderWorms.position.y) > 3) {
-            return moveAndDigTo(leaderWorms.worms.position);
-        }else{
-            Opponent nearTarget = getApproachableOpponent();
-            return moveAndDigTo(nearTarget.worms.position);
+        Worm leaderWorms = gameState.myPlayer.worms[0];
+        Worm nearTarget = opponent.worms[0];
+        if (leaderWorms.id == targetWormId) {
+            if (leaderWorms.health > 0) {
+                if (euclideanDistance(currentWorm.position.x, currentWorm.position.y, leaderWorms.position.x, leaderWorms.position.y) > 3) {
+                    return moveAndDigTo(leaderWorms.position);
+                } else {
+                    nearTarget = getApproachableOpponent();
+                    return moveAndDigTo(nearTarget.position);
+                }
+            }
         }
-
     }
 
     private Command huntStrategy( int targetWormId) {
-        List<Opponent> preyWorms = Arrays.asList();
-        List<Opponent> preyWorm = preyWorms
-                .stream()
-                .filter(prey -> prey.health > 0)
-                .findFirst(prey -> prey.id == targetWormId);
-        return moveAndDigTo(preyWorm.position);
+        Worm preyWorm = opponent.worms[0];
+        if(preyWorm.id == targetWormId){
+            if(preyWorm.health > 0){
+                moveAndDigTo(preyWorm.position);
+            }
+        }
     }
-
 }
 
