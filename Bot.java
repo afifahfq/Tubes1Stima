@@ -4,8 +4,8 @@ import za.co.entelect.challenge.command.*;
 import za.co.entelect.challenge.entities.*;
 import za.co.entelect.challenge.enums.CellType;
 import za.co.entelect.challenge.enums.Direction;
+import za.co.entelect.challenge.enums.PowerUpType;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,27 +31,29 @@ public class Bot {
     }
 
     public Command run() {
-        Worm enemyWormy = opponent.worms[0];
-        if (enemyWormy != null) {
-            return moveAndDigTo(enemyWormy.position);
-
+        Worm enemyWorm = getFirstWormInRange();
+        if (enemyWorm != null) {
+            Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
+            return new ShootCommand(direction);
         }
 
-//        Worm enemyWorm = getFirstWormInRange();
-//        if (enemyWorm != null) {
-//            Direction direction = resolveDirection(currentWorm.position, enemyWorm.position);
-//            return new BananaCommand(enemyWorm.position);
-//        }
+        Cell powerUp = getNearestPowerUp();
+        if (powerUp != null) {
+            Position powerUpPosition = new Position();
+            powerUpPosition.x = powerUp.x;
+            powerUpPosition.y = powerUp.y;
+            return moveAndDigTo(powerUpPosition);
+        }
 
-//        List<Cell> surroundingBlocks = getSurroundingCells(currentWorm.position.x, currentWorm.position.y);
-//        int cellIdx = random.nextInt(surroundingBlocks.size());
-//
-//        Cell block = surroundingBlocks.get(cellIdx);
-//        if (block.type == CellType.AIR) {
-//            return new MoveCommand(block.x, block.y);
-//        } else if (block.type == CellType.DIRT) {
-//            return new DigCommand(block.x, block.y);
-//        }
+        List<Cell> surroundingBlocks = getSurroundingCells(currentWorm.position.x, currentWorm.position.y);
+        int cellIdx = random.nextInt(surroundingBlocks.size());
+
+        Cell block = surroundingBlocks.get(cellIdx);
+        if (block.type == CellType.AIR) {
+            return new MoveCommand(block.x, block.y);
+        } else if (block.type == CellType.DIRT) {
+            return new DigCommand(block.x, block.y);
+        }
 
         return new DoNothingCommand();
     }
@@ -92,7 +94,11 @@ public class Bot {
                 }
 
                 Cell cell = gameState.map[coordinateY][coordinateX];
-                if (cell.type != CellType.AIR) {
+                if (cell.type != CellType.AIR ) {
+                    break;
+                }
+
+                if (cell.occupier != null && cell.occupier.playerId == gameState.myPlayer.id) {
                     break;
                 }
 
@@ -119,7 +125,7 @@ public class Bot {
     }
 
     private int euclideanDistance(int aX, int aY, int bX, int bY) {
-        return (int) (Math.sqrt(Math.pow(aX - bX, 2) + Math.pow(aY - bY, 2)));
+        return (int) Math.floor(Math.sqrt(Math.pow(aX - bX, 2) + Math.pow(aY - bY, 2)));
     }
 
     private boolean isValidCoordinate(int x, int y) {
@@ -197,8 +203,8 @@ public class Bot {
     }
 
     private Cell getNearestPowerUp() {
-        for (int x = 0; x < 33; x++) {
-            for (int y = 0; y < 33; y++) {
+        for (int x=0; x<gameState.mapSize; x++) {
+            for (int y=0; y<gameState.mapSize; y++) {
                 Cell cell = gameState.map[x][y];
                 if (cell.powerup != null) {
                     return cell;
@@ -210,13 +216,20 @@ public class Bot {
     }
 
     private Worm getApproachableOpponent() {
-        List<Worm> opponentss = Arrays.asList(gameState.opponents.worms);
-        List<Worm> thisOpponent = opponentss.stream()
-                .filter(w-> w.health > 0).collect(Collectors.toList());
+        List<Worm> thisOpponent = new ArrayList<>();
+        for (Worm enemyWorm : opponent.worms) {
+            if (enemyWorm.health > 0) {
+                thisOpponent.add(enemyWorm);
+            }
+        }
+
+//        List<Worm> opponentss = Arrays.asList(gameState.opponents.worms);
+//        List<Worm> thisOpponent = opponentss.stream()
+//                .filter(w-> w.health > 0).collect(Collectors.toList());
 
         int[] distance = {0,0,0,0,0,0,0,0};
         for (int i = 0; i < thisOpponent.stream().count(); i++) {
-            distance[i] = euclideanDistance(currentWorm.position.x, currentWorm.position.y, thisOpponent.position.x, thisOpponent.position.y);
+            distance[i] = euclideanDistance(currentWorm.position.x, currentWorm.position.y, thisOpponent.get(i).position.x, thisOpponent.get(i).position.y);
         }
 
         int distMin = 0;
@@ -233,7 +246,7 @@ public class Bot {
         }
 
         return thisOpponent.get(idMin);
-        }
+    }
 
     private Command followStrategy(int targetWormId) {
         Worm leaderWorms = gameState.myPlayer.worms[0];
@@ -248,6 +261,7 @@ public class Bot {
                 }
             }
         }
+        return new DoNothingCommand();
     }
 
     private Command huntStrategy( int targetWormId) {
@@ -257,6 +271,6 @@ public class Bot {
                 moveAndDigTo(preyWorm.position);
             }
         }
+        return new DoNothingCommand();
     }
 }
-
