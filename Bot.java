@@ -45,6 +45,18 @@ public class Bot {
             return moveAndDigTo(powerUpPosition);
         }
 
+        Position target;
+
+        target = canBananaBomb();
+        if (target.x != -1 && target.y != -1) {
+            return new BananaCommand(target);
+        }
+
+        target = canSnowBall();
+        if (target.x != -1 && target.y != -1) {
+            return new SnowballCommand(target);
+        }
+
         Worm huntedWorm = getApproachableOpponent();
         if (huntedWorm != null) {
             return huntStrategy(huntedWorm.id);
@@ -299,4 +311,49 @@ public class Bot {
         }
         return new DoNothingCommand();
     }
+
+    private Position canBananaBomb(){
+        Position enemy= new Position();
+        enemy.x = -1;
+        enemy.y = -1;
+        int distance;
+
+        if (currentWorm.id==2 ) {
+            if (currentWorm.bananaBombs.count>0){
+                for (Worm enemyWorm : opponent.worms) {
+                    if (enemyWorm.health>0) {
+                        distance = euclideanDistance(currentWorm.position.x, currentWorm.position.y, enemyWorm.position.x, enemyWorm.position.y);
+                        if (distance <= currentWorm.bananaBombs.range && distance > currentWorm.bananaBombs.damageRadius) {
+                            enemy.x = enemyWorm.position.x;
+                            enemy.y = enemyWorm.position.y;
+                        }
+                    }
+                }
+            }
+        }
+        return enemy;
+    }
+
+    private Position canSnowBall(){
+        Position enemy= new Position();
+        enemy.x = -1;
+        enemy.y = -1;
+        int distance;
+
+        if (currentWorm.id==3 ) {
+            if (currentWorm.snowBall.count>0){
+                for (Worm enemyWorm : opponent.worms) {
+                    if (enemyWorm.health>0) {
+                        distance = euclideanDistance(currentWorm.position.x, currentWorm.position.y, enemyWorm.position.x, enemyWorm.position.y);
+                        if (distance <= currentWorm.snowBall.range && distance > currentWorm.snowBall.freezeRadius) {
+                            enemy.x = enemyWorm.position.x;
+                            enemy.y = enemyWorm.position.y;
+                        }
+                    }
+                }
+            }
+        }
+        return enemy;
+    }
+
 }
