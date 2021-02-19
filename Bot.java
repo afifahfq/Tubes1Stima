@@ -341,11 +341,11 @@ public class Bot {
         int distance;
 
         if (currentWorm.id==3 ) {
-            if (currentWorm.snowBall.count>0){
+            if (currentWorm.snowballs.count > 0){
                 for (Worm enemyWorm : opponent.worms) {
                     if (enemyWorm.health>0) {
                         distance = euclideanDistance(currentWorm.position.x, currentWorm.position.y, enemyWorm.position.x, enemyWorm.position.y);
-                        if (distance <= currentWorm.snowBall.range && distance > currentWorm.snowBall.freezeRadius) {
+                        if (distance <= currentWorm.snowballs.range && distance > currentWorm.snowballs.freezeRadius) {
                             enemy.x = enemyWorm.position.x;
                             enemy.y = enemyWorm.position.y;
                         }
