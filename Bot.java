@@ -45,6 +45,16 @@ public class Bot {
             return moveAndDigTo(powerUpPosition);
         }
 
+        Worm huntedWorm = getApproachableOpponent();
+        if (huntedWorm != null) {
+            return huntStrategy(huntedWorm.id);
+        }
+
+        int followerId = currentWorm.id;
+        if (followerId != 1) {
+            followStrategy(followerId);
+        }
+
         List<Cell> surroundingBlocks = getSurroundingCells(currentWorm.position.x, currentWorm.position.y);
         int cellIdx = random.nextInt(surroundingBlocks.size());
 
@@ -68,7 +78,7 @@ public class Bot {
 
         for (Worm enemyWorm : opponent.worms) {
             String enemyPosition = String.format("%d_%d", enemyWorm.position.x, enemyWorm.position.y);
-            if (cells.contains(enemyPosition)) {
+            if (cells.contains(enemyPosition) && enemyWorm.health > 0) {
                 return enemyWorm;
             }
         }
@@ -227,7 +237,7 @@ public class Bot {
 //        List<Worm> thisOpponent = opponentss.stream()
 //                .filter(w-> w.health > 0).collect(Collectors.toList());
 
-        int[] distance = {0,0,0,0,0,0,0,0};
+        int[] distance = {0,0,0};
         for (int i = 0; i < thisOpponent.stream().count(); i++) {
             distance[i] = euclideanDistance(currentWorm.position.x, currentWorm.position.y, thisOpponent.get(i).position.x, thisOpponent.get(i).position.y);
         }
@@ -260,15 +270,31 @@ public class Bot {
                     return moveAndDigTo(nearTarget.position);
                 }
             }
+            else {
+                leaderWorms = gameState.myPlayer.worms[1];
+                if (leaderWorms.health > 0) {
+                    if (euclideanDistance(currentWorm.position.x, currentWorm.position.y, leaderWorms.position.x, leaderWorms.position.y) > 3) {
+                        return moveAndDigTo(leaderWorms.position);
+                    } else {
+                        nearTarget = getApproachableOpponent();
+                        return moveAndDigTo(nearTarget.position);
+                    }
+                }
+                else {
+                    nearTarget = getApproachableOpponent();
+                    return moveAndDigTo(nearTarget.position);
+                }
+            }
         }
         return new DoNothingCommand();
     }
 
-    private Command huntStrategy( int targetWormId) {
-        Worm preyWorm = opponent.worms[0];
-        if(preyWorm.id == targetWormId){
-            if(preyWorm.health > 0){
-                moveAndDigTo(preyWorm.position);
+    private Command huntStrategy(int targetWormId) {
+        for (Worm preyWorm : opponent.worms) {
+            if(preyWorm.id == targetWormId){
+                if(preyWorm.health > 0){
+                    moveAndDigTo(preyWorm.position);
+                }
             }
         }
         return new DoNothingCommand();
